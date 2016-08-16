@@ -1,0 +1,185 @@
+﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System;
+using System.Drawing;
+using System.IO;
+using System.Text;
+using System.Windows.Forms;
+
+namespace PdfModify
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            InsertText();
+            MessageBox.Show("finished");
+        }
+        string oldFile = @"E:\\zzz.pdf";
+        string newFile = @"E:\\new.pdf";
+        public void RemoveText()
+        {
+            //Path to where you want the file to output
+            string outputFilePath = newFile;
+            //Path to where the pdf you want to modify is
+            string inputFilePath = oldFile;
+            try
+            {
+                using (Stream inputPdfStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (Stream outputPdfStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+                using (Stream outputPdfStream2 = new FileStream(outputFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                {
+                    //Opens the unmodified PDF for reading
+                    PdfReader reader = new PdfReader(inputPdfStream);
+                    //Creates a stamper to put an image on the original pdf
+                    PdfStamper stamper = new PdfStamper(reader, outputPdfStream); //{ FormFlattening = true, FreeTextFlattening = true };
+
+                    //Creates an image that is the size i need to hide the text i'm interested in removing
+                    iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(new Bitmap(Convert.ToInt32(textBox4.Text), 20), BaseColor.WHITE);
+                    //Sets the position that the image needs to be placed (ie the location of the text to be removed)
+                    //txtX.Text = 33,txtY.Text = 708
+                    image.SetAbsolutePosition(Convert.ToInt32(textBox2.Text), Convert.ToInt32(textBox3.Text));
+                    //Adds the image to the output pdf
+                    stamper.GetOverContent(1).AddImage(image, true);
+                    //Creates the first copy of the outputted pdf
+                    stamper.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        //Create a PDF from existing and with a template
+        private void CreatePDFTemplateMSnew(string strSource)
+        {
+            string oldFile = strSource;
+
+            // open the reader
+            PdfReader reader = new PdfReader(oldFile);
+            iTextSharp.text.Rectangle size = reader.GetPageSizeWithRotation(1);
+            Document document = new Document(size);
+
+            // open the writer
+            MemoryStream ms = new MemoryStream();
+            PdfWriter writer = PdfWriter.GetInstance(document, ms);
+            document.Open();
+
+            // the pdf content
+            PdfContentByte cb = writer.DirectContent;
+            // select the font properties
+            BaseFont bf = BaseFont.CreateFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+            cb.SetColorFill(BaseColor.DARK_GRAY);
+            cb.SetFontAndSize(bf, 12);
+            // create the new page and add it to the pdf
+            PdfImportedPage page = writer.GetImportedPage(reader, 1);
+            cb.AddTemplate(page, 0, 0);
+            // write the text in the pdf content
+            cb.BeginText();
+
+            /*
+            Paragraph paragraph = new Paragraph();
+            paragraph.Alignment = Element.ALIGN_JUSTIFIED;
+            Phrase pharse = new Phrase();
+            Chunk chunk = new Chunk(txtPdf.Text);
+            pharse.Add(chunk);
+            paragraph.Add(pharse);
+            document.Add(paragraph);
+            */
+            string text = "惠州大亚湾西区新寮新村三巷11号龙泉花园3栋2004号房"; //"Put Text"
+            int intAlign = 0; //0
+            int intX = Convert.ToInt16(textBox2.Text); //35
+            int intY = Convert.ToInt16(textBox3.Text); //714
+            int intRotation = 0;//0
+                                                                 // put the alignment and coordinates here
+            cb.ShowTextAligned(intAlign, text, intX, intY, intRotation);
+            cb.EndText();
+            //cb.BeginText();
+            //text = "Other random blabla...";
+            // put the alignment and coordinates here
+            //cb.ShowTextAligned(2, text, 100, 200, 0);
+            //cb.EndText();
+
+            //document.newPage(); 
+            //PdfImportedPage page2 = writer.GetImportedPage(reader, 2); 
+            //cb.AddTemplate(page2, 0, 0);
+            writer.CloseStream = false;
+            if (document.IsOpen()) document.Close();
+            ms.Position = 0;
+
+            // close the streams and voilá the file should be changed :)
+            if (writer != null) writer.Close();
+            if (ms != null) ms.Close();
+            if (reader != null) reader.Close();
+        }
+
+        public void InsertText()
+        {
+
+
+            using (var reader = new PdfReader(oldFile))
+            {
+                using (var fileStream = new FileStream(newFile, FileMode.Create, FileAccess.Write))
+                {
+                    var document = new Document(reader.GetPageSizeWithRotation(1));
+                    var writer = PdfWriter.GetInstance(document, fileStream);
+
+                    document.Open();
+
+                    for (var i = 1; i <= reader.NumberOfPages; i++)
+                    {
+                        document.NewPage();
+
+                        var baseFont = BaseFont.CreateFont(@"C:\Windows\Fonts\simsun.ttc", BaseFont.HELVETICA, BaseFont.NOT_EMBEDDED);
+                        var importedPage = writer.GetImportedPage(reader, i);
+
+                        var contentByte = writer.DirectContentUnder;
+
+                        //Creates an image that is the size i need to hide the text i'm interested in removing
+                        iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(new Bitmap(Convert.ToInt32(textBox4.Text), 20), BaseColor.BLUE);
+                        //Sets the position that the image needs to be placed (ie the location of the text to be removed)
+                        //txtX.Text = 33,txtY.Text = 708
+                        image.SetAbsolutePosition(Convert.ToInt32(textBox2.Text), Convert.ToInt32(textBox3.Text));
+                        //Adds the image to the output pdf
+                        contentByte.AddImage(image, true);
+
+
+                        contentByte.BeginText();
+                        contentByte.SetFontAndSize(baseFont, Convert.ToInt32(textBox1.Text));
+
+                        var multiLineString = "惠州大亚湾西区新寮新村三巷11号龙泉花园3栋2004号房";
+
+                        contentByte.ShowTextAligned(PdfContentByte.ALIGN_LEFT, multiLineString, Convert.ToInt32(textBox2.Text),Convert.ToInt32(textBox3.Text), 0);
+                        
+                        contentByte.EndText();
+                        contentByte.AddTemplate(importedPage, 0, 0);
+                    }
+
+                    document.Close();
+                    writer.Close();
+                }
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            //you want to delete
+            RemoveText();
+
+            //Call below function to create a new text over the deleted one
+            string strSource = newFile;
+            CreatePDFTemplateMSnew(strSource);
+
+        }
+    }
+}
