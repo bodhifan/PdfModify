@@ -35,10 +35,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="itextsharp">
-      <HintPath>E:\CommonLib\itextsharp-all-5.5.9\itextsharp-dll-core\itextsharp.dll</HintPath>
+      <HintPath>C:\Lib\itextsharp-all-5.5.9\itextsharp-dll-core\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="itextsharp.pdfa">
-      <HintPath>E:\CommonLib\itextsharp-all-5.5.9\itextsharp-dll-pdfa\itextsharp.pdfa.dll</HintPath>
+      <HintPath>C:\Lib\itextsharp-all-5.5.9\itextsharp-dll-pdfa\itextsharp.pdfa.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

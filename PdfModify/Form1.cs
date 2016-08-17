@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
@@ -23,12 +24,12 @@ namespace PdfModify
 
         private void button1_Click(object sender, EventArgs e)
         {
-            RemoveText(oldFile,newFile, "惠州大亚湾西区新寮新村三巷11号龙泉花园3栋2004号房");
+            RemoveText(oldFile,newFile, "惠州大亚湾西区新寮新村三巷11号龙泉花园3栋2008号房");
             MessageBox.Show("finished");
         }
-        string oldFile = @"E:\\zzz.pdf";
-        string newFile = @"E:\\new.pdf";
-        string fontFile = @"C:\Program Files (x86)\Adobe\Acrobat Reader DC\Resource\CIDFont\AdobeSongStd-Light.otf";
+        string oldFile = @"C:\\Lib\\zzz.pdf";
+        string newFile = @"C:\\Lib\\new.pdf";
+        string fontFile = @"C:\Windows\Fonts\simsun.ttc,1";
         public void RemoveText(string srcFile,string targetFile,string text)
         {
             // 输出文件pdf
@@ -55,10 +56,13 @@ namespace PdfModify
                     
                     // 将图像添加到第二页
                     var contentByte = stamper.GetOverContent(2);
+                    contentByte.ResetRGBColorFill();
                     stamper.GetOverContent(2).AddImage(image, true);
-                   
+
                     // 2. 在被图像覆盖的地方写入目标文字
-                     var baseFont = BaseFont.CreateFont(fontFile, BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+                    iTextSharp.text.io.StreamUtil.AddToResourceSearch(Assembly.Load("iTextAsian"));
+                    BaseFont baseFont = BaseFont.CreateFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
+                    //var baseFont = BaseFont.CreateFont(fontFile,BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
                     contentByte.BeginText();
                     contentByte.SetFontAndSize(baseFont, Convert.ToInt32(textBox1.Text));
 
